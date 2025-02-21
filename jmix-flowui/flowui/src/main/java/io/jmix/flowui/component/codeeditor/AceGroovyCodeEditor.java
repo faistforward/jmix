@@ -20,6 +20,8 @@ import com.google.common.base.Strings;
 import com.hilerio.ace.AceEditor;
 import com.hilerio.ace.AceMode;
 import com.hilerio.ace.AceTheme;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 import io.jmix.flowui.component.HasRequired;
 import io.jmix.flowui.component.SupportsStatusChangeHandler;
@@ -89,13 +91,17 @@ public class AceGroovyCodeEditor extends AceEditor implements SupportsValueSourc
             if (debounceFuture != null && !debounceFuture.isDone()) {
                 debounceFuture.cancel(false);
             }
+            final Element editorElement = getElement();
+            final UI ui = UI.getCurrent();
             debounceFuture = scheduler.schedule(() -> {
-                getElement()
-                        .executeJs("return this.editor.getValue();")
-                        .then(String.class, value -> {
-                            parseGroovyVariables(value);
-                            upadteSuggestions();
-                        });
+                ui.access(() -> {
+                    editorElement
+                            .executeJs("return this.editor.getValue();")
+                            .then(String.class, value -> {
+                                parseGroovyVariables(value);
+                                upadteSuggestions();
+                            });
+                });
             }, 2, TimeUnit.SECONDS);
         });
     }
