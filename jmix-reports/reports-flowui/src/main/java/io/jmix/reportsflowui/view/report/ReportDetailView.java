@@ -246,12 +246,11 @@ public class ReportDetailView extends StandardDetailView<Report> {
     protected FetchPlans fetchPlans;
     @Autowired
     protected DataManager dataManager;
-    @Autowired
-    private EntityUuidGenerator entityUuidGenerator;
-
     protected JmixComboBoxBinder<String> entityParamFieldBinder;
     protected JmixComboBoxBinder<String> entitiesParamFieldBinder;
     protected JmixComboBoxBinder<String> fetchPlanNameFieldBinder;
+    @Autowired
+    private EntityUuidGenerator entityUuidGenerator;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -1208,7 +1207,7 @@ public class ReportDetailView extends StandardDetailView<Report> {
             }
 
             CodeEditorMode codeEditorMode = getCodeEditorMode(dataSet);
-            dataSetScriptCodeEditor.setMode(codeEditorMode.getId());
+            dataSetScriptCodeEditor.setMode(codeEditorMode);
 
             dataSetScriptCodeEditorHelpBtn.setVisible(CodeEditorMode.GROOVY.getId().equals(dataSetScriptCodeEditor.getMode()));
         }
