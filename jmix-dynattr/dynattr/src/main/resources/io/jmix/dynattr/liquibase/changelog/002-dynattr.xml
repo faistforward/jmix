@@ -16,12 +16,30 @@
   -->
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet author="faistforward" id="2" context="!cuba">
         <modifyDataType tableName="DYNAT_ATTR_VALUE" columnName="STRING_VALUE" newDataType="clob"/>
+    </changeSet>
+    <changeSet author="faistforward" id="3" context="!cuba">
+        <createTable tableName="DYNAT_TEMPLATE">
+            <column name="ID" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="CATEGORY_ID" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+                constraintName="FK_DYNAT_TEMPLATE_CATEGORY"
+                baseTableName="DYNAT_TEMPLATE"
+                baseColumnNames="CATEGORY_ID"
+                referencedTableName="DYNAT_CATEGORY"
+                referencedColumnNames="ID"
+                deferrable="false" initiallyDeferred="false"/>
     </changeSet>
 </databaseChangeLog>
