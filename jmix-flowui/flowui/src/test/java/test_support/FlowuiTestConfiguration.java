@@ -32,6 +32,7 @@ import io.jmix.data.persistence.DbmsSpecifics;
 import io.jmix.eclipselink.EclipselinkConfiguration;
 import io.jmix.eclipselink.impl.JmixEclipselinkTransactionManager;
 import io.jmix.flowui.FlowuiConfiguration;
+import io.jmix.flowui.service.SpringContextAwareGroovyScriptEvaluator;
 import io.jmix.flowui.testassist.vaadin.TestServletContext;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.servlet.ServletContext;
@@ -40,6 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,6 +50,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -117,6 +120,11 @@ public class FlowuiTestConfiguration {
                                                                    JmixModules jmixModules,
                                                                    Resources resources) {
         return new JmixEntityManagerFactoryBean("db1", db1DataSource(), jpaVendorAdapter, dbmsSpecifics, jmixModules, resources);
+    }
+
+    @Bean
+    ScriptEvaluator scriptEvaluator(ClassLoader classLoader, ApplicationContext applicationContext) {
+        return new SpringContextAwareGroovyScriptEvaluator(classLoader, applicationContext);
     }
 
     @Bean

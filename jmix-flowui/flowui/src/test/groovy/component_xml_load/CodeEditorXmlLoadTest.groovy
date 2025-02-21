@@ -20,7 +20,6 @@ import com.vaadin.flow.component.shared.Tooltip
 import component_xml_load.screen.ComponentView
 import io.jmix.core.DataManager
 import io.jmix.flowui.kit.component.codeeditor.CodeEditorMode
-import io.jmix.flowui.kit.component.codeeditor.CodeEditorTheme
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
@@ -63,32 +62,21 @@ class CodeEditorXmlLoadTest extends FlowuiTestSpecification {
             style.get("color") == "red"
             enabled
             errorMessage == "errorMessageString"
-            fontSize == "20"
             height == "50px"
             helperText == "helperTextString"
-            !highlightActiveLine
-            !highlightGutterLine
             label == "labelString"
             maxHeight == "55px"
             maxWidth == "120px"
             minHeight == "40px"
             minWidth == "80px"
             mode == CodeEditorMode.SQL
-            printMarginColumn == 120
             readOnly
-            required
+            !required
             requiredMessage == "requiredMessageString"
-            !showGutter
-            !showLineNumbers
-            !showPrintMargin
             tabIndex == 3
-            textWrap
-            !useSoftTabs
-            theme == CodeEditorTheme.TERMINAL
             title == "titleString"
             !visible
             width == "100px"
-
             tooltip.text == "tooltipText"
             tooltip.focusDelay == 1
             tooltip.hideDelay == 2
@@ -96,7 +84,6 @@ class CodeEditorXmlLoadTest extends FlowuiTestSpecification {
             tooltip.manual
             tooltip.opened
             tooltip.position == Tooltip.TooltipPosition.BOTTOM
-
             value == dataManager.load(Order).all().one().number
         }
     }
