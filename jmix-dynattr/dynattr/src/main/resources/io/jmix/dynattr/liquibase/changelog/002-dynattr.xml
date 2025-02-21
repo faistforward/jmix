@@ -26,20 +26,31 @@
     </changeSet>
     <changeSet author="faistforward" id="3" context="!cuba">
         <createTable tableName="DYNAT_TEMPLATE">
+            <!-- Primärschlüssel -->
             <column name="ID" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="CATEGORY_ID" type="UUID">
-                <constraints nullable="true"/>
+            <!-- Optimistic Locking -->
+            <column name="VERSION" type="INT">
+                <constraints nullable="false"/>
             </column>
+            <!-- Audit-Spalten -->
+            <column name="CREATE_TS" type="TIMESTAMP"/>
+            <column name="CREATED_BY" type="VARCHAR(50)"/>
+            <column name="UPDATE_TS" type="TIMESTAMP"/>
+            <column name="UPDATED_BY" type="VARCHAR(50)"/>
+            <column name="DELETE_TS" type="TIMESTAMP"/>
+            <column name="DELETED_BY" type="VARCHAR(50)"/>
+            <!-- Fremdschlüssel zur Kategorie -->
+            <column name="CATEGORY_ID" type="UUID"/>
         </createTable>
-        
+
+        <!-- Foreign Key Constraint für CATEGORY_ID -->
         <addForeignKeyConstraint
-                constraintName="FK_DYNAT_TEMPLATE_CATEGORY"
                 baseTableName="DYNAT_TEMPLATE"
                 baseColumnNames="CATEGORY_ID"
-                referencedTableName="DYNAT_CATEGORY"
+                referencedTableName="CATEGORY"
                 referencedColumnNames="ID"
-                deferrable="false" initiallyDeferred="false"/>
+                constraintName="FK_DYNAT_TEMPLATE_CATEGORY"/>
     </changeSet>
 </databaseChangeLog>
