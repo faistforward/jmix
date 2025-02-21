@@ -25,5 +25,5 @@
     <property name="uuid.type" dbms="!oracle" value="uuid"/>
 
     <include file="/io/jmix/dynattr/liquibase/changelog/001-dynattr.xml"/>
-
+    <include file="/io/jmix/dynattr/liquibase/changelog/002-dynattr.xml"/>
 </databaseChangeLog>

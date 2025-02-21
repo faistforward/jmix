@@ -1,3 +1,12 @@
+allprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url 'https://maven.vaadin.com/vaadin-addons'
+        }
+    }
+}
+
 buildscript {
     repositories {
         if (rootProject.hasProperty('jmixRepoUrl')) {
@@ -21,6 +30,9 @@ buildscript {
                 url "https://nexus.jmix.io/repository/public"
             }
             gradlePluginPortal()
+        }
+        maven {
+            url 'https://maven.vaadin.com/vaadin-addons'
         }
     }
     dependencies {

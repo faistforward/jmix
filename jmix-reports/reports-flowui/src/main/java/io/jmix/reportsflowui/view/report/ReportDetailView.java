@@ -1208,9 +1208,9 @@ public class ReportDetailView extends StandardDetailView<Report> {
             }
 
             CodeEditorMode codeEditorMode = getCodeEditorMode(dataSet);
-            dataSetScriptCodeEditor.setMode(codeEditorMode);
+            dataSetScriptCodeEditor.setMode(codeEditorMode.getId());
 
-            dataSetScriptCodeEditorHelpBtn.setVisible(CodeEditorMode.GROOVY.equals(dataSetScriptCodeEditor.getMode()));
+            dataSetScriptCodeEditorHelpBtn.setVisible(CodeEditorMode.GROOVY.getId().equals(dataSetScriptCodeEditor.getMode()));
         }
     }
 

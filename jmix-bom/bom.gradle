@@ -20,6 +20,10 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.vaadin.com/vaadin-addons'
+    }
     if (rootProject.hasProperty('jmixRepoUrl')) {
         maven {
             url rootProject['jmixRepoUrl']
@@ -32,12 +36,14 @@ repositories {
             }
         }
         mavenCentral()
+
     } else {
         mavenLocal()
         maven {
             url "https://nexus.jmix.io/repository/public"
         }
         mavenCentral()
+
     }
 }
 
@@ -435,6 +441,9 @@ dependencies {
         api 'com.google.protobuf:protobuf-java:3.25.6'
         api 'com.fasterxml.woodstox:woodstox-core:6.4.0'
         api 'org.apache.lucene:lucene-queryparser:9.12.1'
+
+        api 'com.wontlost:ckeditor-vaadin:4.1.2-8'
+        api 'com.hilerio:ace-widget:2.0.0'
     }
 }
 

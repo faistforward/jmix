@@ -88,6 +88,7 @@ public class CategoryAttributeValue implements Serializable {
     private String code;
 
     @Column(name = "STRING_VALUE")
+    @Lob
     private String stringValue;
 
     @Column(name = "INTEGER_VALUE")

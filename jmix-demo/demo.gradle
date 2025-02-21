@@ -1,0 +1,36 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.jmix'
+apply plugin: 'com.vaadin'
+
+
+group = 'at.faistforward.jmix'
+archivesBaseName = 'jmix-demo'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.postgresql:postgresql'
+
+    api project(':core-starter')
+    api project(':eclipselink-starter')
+    api project(':security-starter')
+    api project(':security-flowui-starter')
+    api project(':security-data-starter')
+    api project(':localfs-starter')
+    api project(':flowui-starter')
+    api project(':flowui-data-starter')
+    api project(':flowui-themes')
+    api project(':datatools-starter')
+    api project(':datatools-flowui-starter')
+
+    api project(':dynattr-starter')
+    api project(':dynattr-flowui-starter')
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'io.jmix.flowui:jmix-flowui-test-assist'
+
+}
+

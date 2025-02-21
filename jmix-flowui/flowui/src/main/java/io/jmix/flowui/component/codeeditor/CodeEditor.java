@@ -17,131 +17,237 @@
 package io.jmix.flowui.component.codeeditor;
 
 import com.google.common.base.Strings;
+import com.hilerio.ace.AceEditor;
+import com.hilerio.ace.AceMode;
+import com.hilerio.ace.AceTheme;
+import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.shared.Registration;
 import io.jmix.flowui.component.HasRequired;
 import io.jmix.flowui.component.SupportsStatusChangeHandler;
 import io.jmix.flowui.component.SupportsValidation;
-import io.jmix.flowui.component.delegate.FieldDelegate;
 import io.jmix.flowui.component.validation.Validator;
 import io.jmix.flowui.data.SupportsValueSource;
 import io.jmix.flowui.data.ValueSource;
 import io.jmix.flowui.exception.ValidationException;
-import io.jmix.flowui.kit.component.codeeditor.JmixCodeEditor;
-import org.springframework.lang.Nullable;
+import io.jmix.flowui.kit.component.HasTitle;
+import io.jmix.flowui.kit.component.codeeditor.CodeEditorMode;
+import io.jmix.flowui.kit.component.codeeditor.CodeEditorTheme;
+import io.jmix.flowui.service.SpringContextAwareGroovyScriptEvaluator;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.Nullable;
+import org.springframework.scripting.ScriptEvaluator;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-public class CodeEditor extends JmixCodeEditor
-        implements SupportsValueSource<String>, SupportsValidation<String>, SupportsStatusChangeHandler<CodeEditor>,
-        HasRequired, ApplicationContextAware, InitializingBean {
+public class CodeEditor extends VerticalLayout implements SupportsValueSource<String>, SupportsValidation<String>, SupportsStatusChangeHandler<AceGroovyCodeEditor>,
+        HasRequired, ApplicationContextAware, InitializingBean, HasHelper, HasLabel,
+        Focusable, HasTitle, HasTooltip, HasValueAndElement<AbstractField.ComponentValueChangeEvent<AceEditor, String>, String> {
+    public static final CodeEditorMode MODE_SQL = CodeEditorMode.SQL;
+    public static final CodeEditorMode MODE_GROOVY = CodeEditorMode.GROOVY;
+    public static final CodeEditorMode MODE_TEXT = CodeEditorMode.TEXT;
 
-    protected ApplicationContext applicationContext;
-    protected FieldDelegate<CodeEditor, String, String> fieldDelegate;
+    private final VerticalLayout tabSheet = new VerticalLayout();
+    private final NativeLabel nativeLabel = new NativeLabel();
+    VerticalLayout helperLayout = new VerticalLayout();
+    private AceGroovyCodeEditor aceGroovyCodeEditor;
+    private Div helperDiv = new Div();
+    private ApplicationContext applicationContext;
+
+    public CodeEditor() {
+        tabSheet.setSizeFull();
+        add(tabSheet);
+        helperDiv.setWidthFull();
+        nativeLabel.getStyle().set("color", "red");
+    }
+
+    private com.vaadin.flow.component.Component createEditorComponent() {
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSizeFull();
+        layout.add(helperDiv);
+        layout.add(aceGroovyCodeEditor);
+        layout.add(nativeLabel);
+        return layout;
+    }
+
+
+    public void setCustomAutoCompletion(Collection<String> suggestions) {
+        aceGroovyCodeEditor.setCustomAutoCompletion(suggestions.stream().collect(Collectors.toUnmodifiableSet()));
+    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        initComponent();
+    }
+
+    private void initComponent() {
+        this.aceGroovyCodeEditor = new AceGroovyCodeEditor();
+        aceGroovyCodeEditor.setApplicationContext(applicationContext);
+        tabSheet.add(createEditorComponent());
+
+        aceGroovyCodeEditor.addValueChangeListener(e -> {
+            if (applicationContext.getBean(ScriptEvaluator.class) instanceof SpringContextAwareGroovyScriptEvaluator se) {
+                nativeLabel.setText(se.checkSyntax(e.getValue()));
+            }
+        });
     }
 
     @Override
     public void afterPropertiesSet() {
-        fieldDelegate = createFieldDelegate();
+        aceGroovyCodeEditor.afterPropertiesSet();
     }
 
     @Override
     public Registration addValidator(Validator<? super String> validator) {
-        return fieldDelegate.addValidator(validator);
+        return aceGroovyCodeEditor.addValidator(validator);
     }
 
     @Override
     public void executeValidators() throws ValidationException {
-        fieldDelegate.executeValidators();
+        aceGroovyCodeEditor.executeValidators();
     }
 
-    @Override
     protected void validate() {
-        fieldDelegate.updateInvalidState();
+        aceGroovyCodeEditor.validate();
     }
 
     @Override
     public boolean isInvalid() {
-        return fieldDelegate.isInvalid();
+        return aceGroovyCodeEditor.isInvalid();
     }
 
     @Override
     public void setInvalid(boolean invalid) {
-        // Method is called from constructor so delegate can be null
-        if (fieldDelegate != null) {
-            fieldDelegate.setInvalid(invalid);
-        } else {
-            getElement().setProperty("invalid", invalid);
-        }
+        aceGroovyCodeEditor.setInvalid(invalid);
     }
 
     @Nullable
     @Override
     public String getErrorMessage() {
-        return fieldDelegate.getErrorMessage();
+        return aceGroovyCodeEditor.getErrorMessage();
     }
 
     @Override
     public void setErrorMessage(@Nullable String errorMessage) {
-        fieldDelegate.setErrorMessage(errorMessage);
+        aceGroovyCodeEditor.setErrorMessage(errorMessage);
     }
 
     @Override
-    public void setStatusChangeHandler(@Nullable Consumer<StatusContext<CodeEditor>> handler) {
-        fieldDelegate.setStatusChangeHandler(handler);
+    public void setStatusChangeHandler(@Nullable Consumer<StatusContext<AceGroovyCodeEditor>> handler) {
+        aceGroovyCodeEditor.setStatusChangeHandler(handler);
     }
 
     @Nullable
     @Override
     public ValueSource<String> getValueSource() {
-        return fieldDelegate.getValueSource();
+        return aceGroovyCodeEditor.getValueSource();
     }
 
     @Override
     public void setValueSource(@Nullable ValueSource<String> valueSource) {
-        fieldDelegate.setValueSource(valueSource);
+        aceGroovyCodeEditor.setValueSource(valueSource);
     }
 
     @Nullable
     @Override
     public String getRequiredMessage() {
-        return fieldDelegate.getRequiredMessage();
+        return aceGroovyCodeEditor.getRequiredMessage();
     }
 
     @Override
     public void setRequiredMessage(@Nullable String requiredMessage) {
-        fieldDelegate.setRequiredMessage(requiredMessage);
+        aceGroovyCodeEditor.setRequiredMessage(requiredMessage);
     }
 
-    @Override
-    public void setValue(String value) {
-        super.setValue(Strings.nullToEmpty(value));
-    }
-
-    @Override
     public void setRequired(boolean required) {
-        super.setRequired(required);
+        aceGroovyCodeEditor.setRequiredIndicatorVisible(required);
+    }
 
-        fieldDelegate.updateRequiredState();
+    public void setRequiredIndicatorVisible(boolean required) {
+        aceGroovyCodeEditor.setRequiredIndicatorVisible(required);
+    }
+
+    public String getValue() {
+        return aceGroovyCodeEditor.getValue();
+    }
+
+    public void setValue(String value) {
+        aceGroovyCodeEditor.setValue(Strings.nullToEmpty(value));
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean required) {
-        super.setRequiredIndicatorVisible(required);
-
-        fieldDelegate.updateRequiredState();
+    public Registration addValueChangeListener(ValueChangeListener<? super AbstractField.ComponentValueChangeEvent<AceEditor, String>> valueChangeListener) {
+        return aceGroovyCodeEditor.addValueChangeListener(valueChangeListener);
     }
 
-
-    @SuppressWarnings("unchecked")
-    protected FieldDelegate<CodeEditor, String, String> createFieldDelegate() {
-        return applicationContext.getBean(FieldDelegate.class, this);
+    @Override
+    public void setHelperComponent(Component html) {
+        this.helperDiv.removeAll();
+        helperDiv.add(html);
     }
+
+    public CodeEditorMode getMode() {
+        var mode = aceGroovyCodeEditor.getMode().name();
+        if (mode != null) {
+            return CodeEditorMode.fromId(mode);
+        }
+        return null;
+    }
+
+    public void setMode(CodeEditorMode codeEditorMode) {
+        Arrays.stream(AceMode.values()).filter(v -> v.name().equals(codeEditorMode.getId())).findFirst().ifPresent(v -> aceGroovyCodeEditor.setMode(v));
+    }
+
+    public void setTheme(CodeEditorTheme aceTheme) {
+        if (aceTheme != null) {
+            Arrays.stream(AceTheme.values()).filter(act -> act.name().equals(aceTheme.getId())).findFirst().ifPresent(v -> aceGroovyCodeEditor.setTheme(v));
+        }
+    }
+
+    public void setUseSoftTabs(Boolean aBoolean) {
+        aceGroovyCodeEditor.setUseSoftTabs(aBoolean);
+    }
+
+    public void setTextWrap(Boolean aBoolean) {
+        aceGroovyCodeEditor.setTextWrap(aBoolean);
+    }
+
+    public void setFontSize(String s) {
+        aceGroovyCodeEditor.setFontSize(s);
+    }
+
+    public void setPrintMarginColumn(Integer integer) {
+        aceGroovyCodeEditor.setPrintMarginColumn(integer);
+    }
+
+    public void setShowPrintMargin(Boolean aBoolean) {
+        aceGroovyCodeEditor.setShowPrintMargin(aBoolean);
+    }
+
+    public void setShowLineNumbers(Boolean aBoolean) {
+        aceGroovyCodeEditor.setShowLineNumbers(aBoolean);
+    }
+
+    public void setShowGutter(Boolean aBoolean) {
+        aceGroovyCodeEditor.setShowGutter(aBoolean);
+    }
+
+    public void setHighlightGutterLine(Boolean aBoolean) {
+        aceGroovyCodeEditor.setHighlightGutterLine(aBoolean);
+    }
+
+    public void setHighlightActiveLine(Boolean aBoolean) {
+        aceGroovyCodeEditor.setHighlightActiveLine(aBoolean);
+    }
+
 }

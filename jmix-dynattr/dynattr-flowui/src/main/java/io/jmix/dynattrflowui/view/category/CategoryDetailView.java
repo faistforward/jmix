@@ -36,8 +36,10 @@ import io.jmix.core.metamodel.model.MetadataObject;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.dynattr.AttributeType;
 import io.jmix.dynattr.MsgBundleTools;
+import io.jmix.dynattr.model.Categorized;
 import io.jmix.dynattr.model.Category;
 import io.jmix.dynattr.model.CategoryAttribute;
+import io.jmix.dynattrflowui.DynAttrUiProperties;
 import io.jmix.dynattrflowui.utils.DynAttrUiHelper;
 import io.jmix.dynattrflowui.view.categoryattr.CategoryAttributesDetailView;
 import io.jmix.dynattrflowui.view.localization.AttributeLocalizationComponent;
@@ -108,7 +110,8 @@ public class CategoryDetailView extends StandardDetailView<Category> {
     protected DataComponents dataComponents;
     @Autowired
     protected MsgBundleTools msgBundleTools;
-
+    @Autowired
+    protected DynAttrUiProperties dynAttrUiProperties;
 
     @ViewComponent
     protected InstanceContainer<Category> categoryDc;
@@ -140,6 +143,7 @@ public class CategoryDetailView extends StandardDetailView<Category> {
     public void onInitEvent(InitEvent event) {
         sortCategoryAttrsGridByOrderNo();
     }
+
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
@@ -194,7 +198,12 @@ public class CategoryDetailView extends StandardDetailView<Category> {
             if (metadataTools.hasCompositePrimaryKey(metaClass) && !metadataTools.hasUuid(metaClass)) {
                 continue;
             }
-            options.put(metaClass, messageTools.getDetailedEntityCaption(metaClass));
+
+            if (dynAttrUiProperties.isOnlyCategorizedClasses() && Categorized.class.isAssignableFrom(metaClass.getJavaClass())) {
+                options.put(metaClass, messageTools.getDetailedEntityCaption(metaClass));
+            }else if(!dynAttrUiProperties.isOnlyCategorizedClasses()){
+                options.put(metaClass, messageTools.getDetailedEntityCaption(metaClass));
+            }
         }
         entityTypeField.setItemLabelGenerator(options::get);
         //noinspection unchecked

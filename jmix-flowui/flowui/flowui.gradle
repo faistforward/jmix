@@ -30,6 +30,8 @@ dependencies {
     api 'org.springframework.boot:spring-boot-autoconfigure'
 
     implementation 'com.google.code.gson:gson'
+    implementation 'com.wontlost:ckeditor-vaadin'
+    implementation 'com.hilerio:ace-widget'
 
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'org.spockframework:spock-spring'

@@ -253,6 +253,7 @@ public class CommonAttributeDefinition implements AttributeDefinition, Serializa
             case DATE -> attribute.getDefaultDate();
             case DATE_WITHOUT_TIME -> attribute.getDefaultDateWithoutTime();
             case STRING, ENUMERATION -> attribute.getDefaultString();
+            case BUTTON ->  attribute.getDefaultString();
             case ENTITY -> {
                 if (attribute.getDefaultEntity() == null) {
                     yield null;

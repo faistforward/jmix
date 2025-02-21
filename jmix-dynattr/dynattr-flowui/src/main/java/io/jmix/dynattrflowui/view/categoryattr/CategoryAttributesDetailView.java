@@ -758,14 +758,14 @@ public class CategoryAttributesDetailView extends StandardDetailView<CategoryAtt
                     dynAttrUiHelper.createHelperButton(
                             messages.getMessage(CategoryAttributesDetailView.class, "optionsLoaderGroovyScriptHelp"))
             );
-            optionsLoaderScriptField.setMode(CodeEditorMode.GROOVY);
+            optionsLoaderScriptField.setMode(CodeEditor.MODE_GROOVY);
         } else if (optionsType == SQL) {
             attachHelperForSuffix(
                     optionsLoaderScriptField,
                     dynAttrUiHelper.createHelperButton(
                             messages.getMessage(CategoryAttributesDetailView.class, "optionsLoaderSqlScriptHelp"))
             );
-            optionsLoaderScriptField.setMode(CodeEditorMode.SQL);
+            optionsLoaderScriptField.setMode(CodeEditor.MODE_SQL);
         } else if (optionsType == JPQL) {
             attachHelperForSuffix(
                     joinClauseField,
@@ -782,7 +782,7 @@ public class CategoryAttributesDetailView extends StandardDetailView<CategoryAtt
                     whereClauseField,
                     new Div()
             );
-            optionsLoaderScriptField.setMode(CodeEditorMode.TEXT);
+            optionsLoaderScriptField.setMode(CodeEditor.MODE_TEXT);
         }
 
         optionsLoaderTypeField.setEnabled(Boolean.TRUE.equals(categoryAttribute.getLookup()));

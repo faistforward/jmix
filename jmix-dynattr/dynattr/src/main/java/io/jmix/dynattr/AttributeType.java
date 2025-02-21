@@ -30,7 +30,9 @@ public enum AttributeType implements EnumClass<String> {
     DATE_WITHOUT_TIME,
     BOOLEAN,
     ENTITY,
-    ENUMERATION;
+    ENUMERATION,
+    BUTTON;
+
 
     @Override
     public String getId() {

@@ -27,17 +27,21 @@ public class DynAttrUiProperties {
      * Max columns count for DynamicAttributesPanel
      */
     int dynamicAttributesPanelMaxColumnsCount;
-
     /**
      * Max recalculation level for dynamic attributes
      */
     int maxRecalculationLevel;
-
+    /**
+     * Only Classes with Categorized Interface can be used for DynamicAttributes
+     */
+    boolean onlyCategorizedClasses;
     @ConstructorBinding
     public DynAttrUiProperties(@DefaultValue("4") int dynamicAttributesPanelMaxCount,
-                               @DefaultValue("10") int maxRecalculationLevel) {
+                               @DefaultValue("10") int maxRecalculationLevel,
+                               @DefaultValue("false") boolean onlyCategorizedClasses ) {
         this.dynamicAttributesPanelMaxColumnsCount = dynamicAttributesPanelMaxCount;
         this.maxRecalculationLevel = maxRecalculationLevel;
+        this.onlyCategorizedClasses = onlyCategorizedClasses;
     }
 
     /**
@@ -52,5 +56,9 @@ public class DynAttrUiProperties {
      */
     public int getMaxRecalculationLevel() {
         return maxRecalculationLevel;
+    }
+
+    public boolean isOnlyCategorizedClasses() {
+        return onlyCategorizedClasses;
     }
 }

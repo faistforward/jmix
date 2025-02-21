@@ -16,6 +16,8 @@
 
 package io.jmix.flowui.xml.layout.loader.component;
 
+import com.hilerio.ace.AceMode;
+import com.hilerio.ace.AceTheme;
 import io.jmix.flowui.component.codeeditor.CodeEditor;
 import io.jmix.flowui.kit.component.codeeditor.CodeEditorMode;
 import io.jmix.flowui.kit.component.codeeditor.CodeEditorTheme;
@@ -45,7 +47,7 @@ public class CodeEditorLoader extends AbstractComponentLoader<CodeEditor> {
         loadBoolean(element, "textWrap", resultComponent::setTextWrap);
         loadBoolean(element, "useSoftTabs", resultComponent::setUseSoftTabs);
 
-        loadEnum(element, CodeEditorMode.class, "mode", resultComponent::setMode);
+        loadEnum(element,CodeEditorMode.class,"mode", resultComponent::setMode);
         loadEnum(element, CodeEditorTheme.class, "theme", resultComponent::setTheme);
 
         componentLoader().loadClassNames(resultComponent, element);
