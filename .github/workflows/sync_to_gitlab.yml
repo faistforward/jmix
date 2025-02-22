@@ -18,4 +18,4 @@ jobs:
       - name: Push all branches to GitLab
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/develop.faist/jmix.git
-          git push --mirror gitlab
+          git push --mirror --prune gitlab
