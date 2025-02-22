@@ -3,7 +3,7 @@ name: Sync GitHub to GitLab
 on:
   push:
     branches:
-      - "**" # Reagiert auf Änderungen in allen Branches
+      - "**" # Trigger für alle Branches
 
 jobs:
   sync-to-gitlab:
@@ -13,9 +13,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Alle Branches holen
+          fetch-depth: 0 # Holt alle Branches
 
       - name: Push all branches to GitLab
         run: |
-          git remote add gitlab ${{ secrets.GITLAB_REPO_URL }}
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/develop.faist/jmix.git
           git push --mirror gitlab
