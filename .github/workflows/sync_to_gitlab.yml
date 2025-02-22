@@ -1,0 +1,21 @@
+name: Sync GitHub to GitLab
+
+on:
+  push:
+    branches:
+      - "**" # Reagiert auf Änderungen in allen Branches
+
+jobs:
+  sync-to-gitlab:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Alle Branches holen
+
+      - name: Push all branches to GitLab
+        run: |
+          git remote add gitlab ${{ secrets.GITLAB_REPO_URL }}
+          git push --mirror gitlab
