@@ -25,10 +25,20 @@ jobs:
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/develop.faist/jmix.git
           
-          # Pusht alle Branches (ohne "origin/" Prefix)
+          # Hole alle Branches aus GitHub
           for branch in $(git branch -r | grep -v 'HEAD' | sed 's/origin\///'); do
-            echo "Pushing branch: $branch"
-            git push --prune gitlab origin/$branch:$branch
+            echo "Processing branch: $branch"
+
+            # Prüfe, ob der Branch bereits in GitLab existiert
+            if git ls-remote --exit-code --heads gitlab $branch; then
+              echo "Branch $branch exists in GitLab. Pushing updates..."
+            else
+              echo "Branch $branch does NOT exist in GitLab. Creating it..."
+              git push gitlab origin/$branch:refs/heads/$branch
+            fi
+
+            # Pushen der Änderungen
+            git push --prune gitlab origin/$branch:refs/heads/$branch
           done
 
           # Pusht alle Tags
