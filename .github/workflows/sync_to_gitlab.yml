@@ -15,10 +15,10 @@ jobs:
         with:
           fetch-depth: 0  # Holt alle Commits & Historie
 
-      - name: Fetch all branches
+      - name: Fetch all branches from GitHub
         run: |
-          git fetch --prune --unshallow
-          git fetch origin "+refs/heads/*:refs/remotes/origin/*" # Holt ALLE Branches
+          git remote set-url origin https://github.com/${{ github.repository }}.git
+          git fetch --prune origin  # Holt ALLE Branches & entfernt alte
           git branch -r  # Debug: Zeigt alle Remote-Branches an
 
       - name: Push all branches and tags to GitLab
