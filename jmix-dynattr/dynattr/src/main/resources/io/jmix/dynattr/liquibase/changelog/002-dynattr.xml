@@ -41,16 +41,24 @@
             <column name="UPDATED_BY" type="VARCHAR(50)"/>
             <column name="DELETE_TS" type="TIMESTAMP"/>
             <column name="DELETED_BY" type="VARCHAR(50)"/>
-            <!-- Fremdschlüssel zur Kategorie -->
-            <column name="CATEGORY_ID" type="UUID"/>
         </createTable>
 
-        <!-- Foreign Key Constraint für CATEGORY_ID -->
-        <addForeignKeyConstraint
-                baseTableName="DYNAT_TEMPLATE"
-                baseColumnNames="CATEGORY_ID"
-                referencedTableName="CATEGORY"
-                referencedColumnNames="ID"
-                constraintName="FK_DYNAT_TEMPLATE_CATEGORY"/>
+    </changeSet>
+    <changeSet id="4" author="faistforward">
+        <addColumn tableName="DYNAT_CATEGORY_ATTR">
+            <column name="CAT_GROUP" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="VISIBLE" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="WITH_RATE" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+            <column name="WITH_NOTE" type="boolean">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <modifyDataType tableName="DYNAT_CATEGORY_ATTR" columnName="ENUMERATION" newDataType="CLOB"/>
     </changeSet>
 </databaseChangeLog>

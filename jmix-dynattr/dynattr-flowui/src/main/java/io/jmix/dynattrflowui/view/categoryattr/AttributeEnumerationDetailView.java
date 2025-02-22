@@ -16,9 +16,7 @@
 
 package io.jmix.dynattrflowui.view.categoryattr;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
@@ -30,6 +28,7 @@ import io.jmix.core.*;
 import io.jmix.core.accesscontext.CrudEntityContext;
 import io.jmix.dynattr.MsgBundleTools;
 import io.jmix.dynattrflowui.impl.model.AttributeLocalizedEnumValue;
+import io.jmix.dynattrflowui.utils.DynEnumStringParser;
 import io.jmix.dynattrflowui.view.localization.AttributeLocalizationComponent;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -85,26 +84,23 @@ public class AttributeEnumerationDetailView extends StandardView {
     protected CollectionContainer<AttributeLocalizedEnumValue> localizedEnumValuesDc;
     @ViewComponent
     protected DataGrid<AttributeLocalizedEnumValue> localizedEnumValuesDataGrid;
+    @ViewComponent
+    protected TypedTextField extValueField;
 
     protected String enumeration;
     protected String enumerationLocales;
     protected AttributeLocalizationComponent localizationFragment;
     protected List<AttributeLocalizedEnumValue> localizedEnumValues = new ArrayList<>();
 
-
-    public void setEnumeration(String enumeration) {
-        this.enumeration = enumeration;
-    }
-
-    public void setEnumerationLocales(String enumerationLocales) {
-        this.enumerationLocales = enumerationLocales;
-    }
-
     public String getEnumeration() {
         return Strings.emptyToNull(localizedEnumValuesDc.getItems()
                 .stream()
-                .map(AttributeLocalizedEnumValue::getValue)
+                .map(DynEnumStringParser::toEnumString)
                 .collect(Collectors.joining(",")));
+    }
+
+    public void setEnumeration(String enumeration) {
+        this.enumeration = enumeration;
     }
 
     public String getEnumerationLocales() {
@@ -113,6 +109,10 @@ public class AttributeEnumerationDetailView extends StandardView {
                 .map(AttributeLocalizedEnumValue::getLocalizedValues)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining()));
+    }
+
+    public void setEnumerationLocales(String enumerationLocales) {
+        this.enumerationLocales = enumerationLocales;
     }
 
     @Subscribe
@@ -154,6 +154,7 @@ public class AttributeEnumerationDetailView extends StandardView {
             localizedEnumValues.add(localizedEnumValue);
             localizedEnumValuesDl.load();
             valueField.clear();
+            extValueField.clear();
         }
     }
 
@@ -216,15 +217,25 @@ public class AttributeEnumerationDetailView extends StandardView {
 
     protected void initLocalizedEnumValuesDataGrid() {
         if (!Strings.isNullOrEmpty(enumeration)) {
-            List<String> enumValues = Lists.newArrayList(Splitter.on(",").omitEmptyStrings().split(enumeration));
+            Map<String, String> enumValues = DynEnumStringParser.parseStringToMap(enumeration);
+
             Map<String, String> enumMsgBundleValues = msgBundleTools.getEnumMsgBundleValues(enumerationLocales);
 
-            for (String enumValue : enumValues) {
-                AttributeLocalizedEnumValue localizedEnumValue = createAttributeLocalizedEnumValue(enumValue);
+            for (Map.Entry<String, String> enumValue : enumValues.entrySet()) {
+                AttributeLocalizedEnumValue localizedEnumValue = createExtAttributeLocalizedEnumValue(enumValue.getKey(), enumValue.getValue());
                 localizedEnumValue.setLocalizedValues(enumMsgBundleValues.get(localizedEnumValue.getValue()));
                 localizedEnumValues.add(localizedEnumValue);
             }
         }
+    }
+
+    protected AttributeLocalizedEnumValue createExtAttributeLocalizedEnumValue(String enumValue, String enumExtValue) {
+
+        AttributeLocalizedEnumValue localizedEnumValue = metadata.create(AttributeLocalizedEnumValue.class);
+        localizedEnumValue.setValue(enumValue);
+        localizedEnumValue.setExtValue(enumExtValue);
+        return localizedEnumValue;
+
     }
 
     protected void initLocalizationFragment() {

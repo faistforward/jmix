@@ -20,7 +20,8 @@ import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.shared.HasSuffix;
+import io.jmix.core.entity.HasManagedEntity;
+import io.jmix.dynattrflowui.panel.dynamicwizard.DynamicFormPanel;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -39,6 +40,28 @@ public class DynAttrUiHelper {
     public DynAttrUiHelper(Dialogs dialogs, UiComponents uiComponents) {
         this.dialogs = dialogs;
         this.uiComponents = uiComponents;
+    }
+
+    /**
+     * Recursively traverses the component tree starting from the given root component
+     * and returns the first component that implements the HasManagedEntity interface.
+     *
+     * @param component the starting point in the component tree
+     * @return the found component as a HasManagedEntity, or null if none is found
+     */
+    public HasManagedEntity findManagedEntity(com.vaadin.flow.component.Component component) {
+        return findComponent(component, HasManagedEntity.class);
+    }
+
+    /**
+     * Recursively traverses the component tree starting from the given root component
+     * and returns the first component that is an instance of DynamicFormPanel.
+     *
+     * @param component the starting point in the component tree
+     * @return the found component as a DynamicFormPanel, or null if none is found
+     */
+    public DynamicFormPanel findDynamicFormPanel(com.vaadin.flow.component.Component component) {
+        return findComponent(component, DynamicFormPanel.class);
     }
 
     public <T> void moveTableItemUp(CollectionContainer<T> collectionContainer, Grid<T> table, Runnable afterMoveCommand) {
@@ -89,5 +112,30 @@ public class DynAttrUiHelper {
                         .withContent(new Html(MessageFormat.format("<div>{0}</div>", message)))
                         .open());
         return helperButton;
+    }
+
+    /**
+     * Recursively traverses the component tree starting from the given root component
+     * and returns the first component that is an instance of the specified target class.
+     *
+     * @param component   the starting point in the component tree
+     * @param targetClass the class to search for
+     * @param <T>         the type parameter representing the target class
+     * @return the found component as type T, or null if no matching component is found
+     */
+    public <T> T findComponent(com.vaadin.flow.component.Component component, Class<T> targetClass) {
+        if (targetClass.isInstance(component)) {
+            return targetClass.cast(component);
+        }
+
+        // Iterate over all child components
+        for (com.vaadin.flow.component.Component child : component.getChildren().toList()) {
+            T found = findComponent(child, targetClass);
+            if (found != null) {
+                return found;
+            }
+        }
+
+        return null;
     }
 }

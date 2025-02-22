@@ -63,6 +63,12 @@
                                       requiredMessage="msg://dataTypeField.required"/>
                             <textArea id="descriptionField" property="description" minHeight="7em"/>
                             <checkbox id="isRequiredField" property="required"/>
+                            <checkbox id="withNote" property="withNote"
+                                      label="msg://io.jmix.dynattr.model/CategoryAttribute.withNote"/>
+                            <checkbox id="withRate" property="withRate"
+                                      label="msg://io.jmix.dynattr.model/CategoryAttribute.withRate"/>
+                            <checkbox id="visible" property="visible"
+                                      label="msg://io.jmix.dynattr.model/CategoryAttribute.visible"/>
                         </formLayout>
                         <formLayout id="optionalAttributeForm" dataContainer="categoryAttributeDc"
                                     width="100%"

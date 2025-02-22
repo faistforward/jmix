@@ -34,7 +34,8 @@ public class AttributeLocalizedEnumValue {
 
     @JmixProperty
     protected String value;
-
+    @JmixProperty
+    protected String extValue;
     @JmixProperty
     protected String localizedValues;
 
@@ -60,5 +61,13 @@ public class AttributeLocalizedEnumValue {
 
     public void setLocalizedValues(String localizedValues) {
         this.localizedValues = localizedValues;
+    }
+
+    public String getExtValue() {
+        return extValue;
+    }
+
+    public void setExtValue(String extValue) {
+        this.extValue = extValue;
     }
 }

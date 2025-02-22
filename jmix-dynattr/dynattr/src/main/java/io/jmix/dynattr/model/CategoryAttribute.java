@@ -51,66 +51,60 @@ import java.util.*;
 @SystemLevel
 public class CategoryAttribute implements Serializable {
     private static final long serialVersionUID = -6959392628534815752L;
-
+    @Column(name = "FILTER_XML")
+    protected String filterXml;
+    @Column(name = "LOCALE_NAMES")
+    protected String localeNames;
+    @Column(name = "LOCALE_DESCRIPTIONS")
+    protected String localeDescriptions;
+    @Column(name = "ENUMERATION_LOCALES")
+    protected String enumerationLocales;
+    @Column(name = "ATTRIBUTE_CONFIGURATION_JSON")
+    @Convert(converter = CategoryAttributeConfigurationConvertor.class)
+    protected CategoryAttributeConfiguration configuration;
     @Id
     @Column(name = "ID")
     @JmixGeneratedValue
     private UUID id;
-
     @Version
     @Column(name = "VERSION", nullable = false)
     private Integer version;
-
     @CreatedDate
     @Column(name = "CREATE_TS")
     private Date createTs;
-
     @CreatedBy
     @Column(name = "CREATED_BY", length = 50)
     private String createdBy;
-
     @LastModifiedDate
     @Column(name = "UPDATE_TS")
     private Date updateTs;
-
     @LastModifiedBy
     @Column(name = "UPDATED_BY", length = 50)
     private String updatedBy;
-
     @DeletedDate
     @Column(name = "DELETE_TS")
     private Date deleteTs;
-
     @DeletedBy
     @Column(name = "DELETED_BY", length = 50)
     private String deletedBy;
-
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "CATEGORY_ID")
     private Category category;
-
     @Column(name = "CATEGORY_ENTITY_TYPE")
     private String categoryEntityType;
-
     @Column(name = "NAME", nullable = false)
     private String name;
-
     @Pattern(message = "{msg://io.jmix.dynattr.model/CategoryAttribute.code.validation.wrongFormat}", regexp = "^[a-z]\\w*$")
     @Column(name = "CODE", nullable = false)
     private String code;
-
     @Column(name = "DESCRIPTION")
     private String description;
-
     @Column(name = "ENUMERATION")
     private String enumeration;
-
     @Column(name = "DATA_TYPE")
     private String dataType;
-
     @Column(name = "ENTITY_CLASS")
     private String entityClass;
-
     @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "entityId", column = @Column(name = "DEFAULT_ENTITY_VALUE")),
@@ -120,76 +114,51 @@ public class CategoryAttribute implements Serializable {
     })
     @EmbeddedParameters(nullAllowed = true)
     private ReferenceToEntity defaultEntity;
-
     @Column(name = "ORDER_NO")
     private Integer orderNo = 0;
-
     @Column(name = "SCREEN")
     private String screen;
-
     @Column(name = "REQUIRED")
     private Boolean required = false;
-
     @Column(name = "LOOKUP")
     private Boolean lookup = false;
-
     @Column(name = "TARGET_SCREENS")
     private String targetScreens;//comma separated list of screenId#componentId pairs. componentId might be empty
-
     @Column(name = "DEFAULT_STRING")
     private String defaultString;
-
     @Column(name = "DEFAULT_INT")
     private Integer defaultInt;
-
     @Column(name = "DEFAULT_DOUBLE")
     private Double defaultDouble;
-
     @Column(name = "DEFAULT_DECIMAL", precision = 36, scale = 10)
     private BigDecimal defaultDecimal;
-
     @Column(name = "DEFAULT_BOOLEAN")
     private Boolean defaultBoolean;
-
     @Column(name = "DEFAULT_DATE")
     private Date defaultDate;
-
     @Column(name = "DEFAULT_DATE_WO_TIME")
     private LocalDate defaultDateWithoutTime;
-
     @Column(name = "DEFAULT_DATE_IS_CURRENT")
     private Boolean defaultDateIsCurrent;
-
     @Column(name = "WIDTH", length = 20)
     private String width;
-
     @Column(name = "ROWS_COUNT")
     private Integer rowsCount;
-
     @Column(name = "IS_COLLECTION")
     private Boolean isCollection = false;
-
     @Column(name = "WHERE_CLAUSE")
     private String whereClause;
-
     @Column(name = "JOIN_CLAUSE")
     private String joinClause;
-
-    @Column(name = "FILTER_XML")
-    protected String filterXml;
-
-    @Column(name = "LOCALE_NAMES")
-    protected String localeNames;
-
-    @Column(name = "LOCALE_DESCRIPTIONS")
-    protected String localeDescriptions;
-
-    @Column(name = "ENUMERATION_LOCALES")
-    protected String enumerationLocales;
-
-    @Column(name = "ATTRIBUTE_CONFIGURATION_JSON")
-    @Convert(converter = CategoryAttributeConfigurationConvertor.class)
-    protected CategoryAttributeConfiguration configuration;
+    // from here new Liquibase Attributes
+    @Column(name = "CAT_GROUP")
+    private String group;
+    @Column(name = "VISIBLE")
+    private Boolean visible = true;
+    @Column(name = "WITH_RATE")
+    private Boolean withRate;
+    @Column(name = "WITH_NOTE")
+    private Boolean withNote;
 
     @PostConstruct
     public void init(@NotNull Metadata metadata) {
@@ -266,12 +235,12 @@ public class CategoryAttribute implements Serializable {
         return String.format("%s (%s)", getName(), getCode());
     }
 
-    public void setCategory(Category entityType) {
-        this.category = entityType;
-    }
-
     public Category getCategory() {
         return category;
+    }
+
+    public void setCategory(Category entityType) {
+        this.category = entityType;
     }
 
     public String getName() {
@@ -374,13 +343,13 @@ public class CategoryAttribute implements Serializable {
         this.defaultDateWithoutTime = defaultDateTime;
     }
 
-    public void setObjectDefaultEntityId(Object entity) {
-        defaultEntity.setObjectEntityId(entity);
-    }
-
     @Nullable
     public Object getObjectDefaultEntityId() {
         return defaultEntity != null ? defaultEntity.getObjectEntityId() : null;
+    }
+
+    public void setObjectDefaultEntityId(Object entity) {
+        defaultEntity.setObjectEntityId(entity);
     }
 
     public Integer getOrderNo() {
@@ -507,23 +476,11 @@ public class CategoryAttribute implements Serializable {
         return localeNames;
     }
 
-    public String getLocaleDescriptions() {
-        return localeDescriptions;
-    }
-
-    public String getEnumerationLocales() {
-        return enumerationLocales;
-    }
-
-    public String getNameMsgBundle() {
-        return localeNames;
-    }
-
     public void setLocaleNames(String localeNames) {
         this.localeNames = localeNames;
     }
 
-    public String getDescriptionsMsgBundle() {
+    public String getLocaleDescriptions() {
         return localeDescriptions;
     }
 
@@ -531,12 +488,56 @@ public class CategoryAttribute implements Serializable {
         this.localeDescriptions = localeDescriptions;
     }
 
+    public String getEnumerationLocales() {
+        return enumerationLocales;
+    }
+
     public void setEnumerationLocales(String enumerationLocales) {
         this.enumerationLocales = enumerationLocales;
     }
 
+    public String getNameMsgBundle() {
+        return localeNames;
+    }
+
+    public String getDescriptionsMsgBundle() {
+        return localeDescriptions;
+    }
+
     public String getEnumerationMsgBundle() {
         return enumerationLocales;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public Boolean getVisible() {
+        return visible;
+    }
+
+    public void setVisible(Boolean visible) {
+        this.visible = visible;
+    }
+
+    public Boolean getWithRate() {
+        return withRate;
+    }
+
+    public void setWithRate(Boolean withRate) {
+        this.withRate = withRate;
+    }
+
+    public Boolean getWithNote() {
+        return withNote;
+    }
+
+    public void setWithNote(Boolean withNote) {
+        this.withNote = withNote;
     }
 
     public CategoryAttributeConfiguration getConfiguration() {

@@ -31,8 +31,11 @@ import io.jmix.core.metamodel.datatype.FormatStringsRegistry;
 import io.jmix.core.metamodel.datatype.impl.AdaptiveNumberDatatype;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.dynattr.*;
+import io.jmix.dynattrflowui.components.AuditRateRadioGroup;
 import io.jmix.dynattrflowui.impl.*;
+import io.jmix.dynattrflowui.panel.dynamicwizard.DynRateConstants;
 import io.jmix.dynattrflowui.utils.DataProviderUtils;
+import io.jmix.dynattrflowui.utils.DynEnumStringParser;
 import io.jmix.flowui.Actions;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.action.entitypicker.EntityClearAction;
@@ -46,6 +49,7 @@ import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.datepicker.TypedDatePicker;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.multiselectcomboboxpicker.JmixMultiSelectComboBoxPicker;
+import io.jmix.flowui.component.richtexteditor.RichTextEditor;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.component.validation.Validator;
@@ -59,6 +63,7 @@ import io.jmix.flowui.kit.component.HasActions;
 import io.jmix.flowui.kit.component.HasTitle;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.ViewRegistry;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
@@ -68,6 +73,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.jmix.dynattr.AttributeType.*;
 
@@ -124,11 +130,54 @@ public class DynAttrComponentGenerationStrategy implements ComponentGenerationSt
         if (!DynAttrUtils.isDynamicAttributeProperty(propertyName)) {
             return null;
         }
-
+        var extComponentResult = createComponentExtInternal(context);
+        if (extComponentResult != null) {
+            return extComponentResult;
+        }
         return createComponentInternal(context, metaClass, propertyName);
     }
 
+    protected Component createComponentExtInternal(ComponentGenerationContext context) {
+        var property = context.getProperty();
+        if (property == null) {
+            return null;
+        }
+        AttributeDefinition attribute = dynamicModelMetadata.getAttributeByCode(context.getMetaClass(),
+                DynAttrUtils.getAttributeCodeFromProperty(property)).orElse(null);
+        if (attribute == null) {
+            return null;
+        }
+        var enumarations = attribute.getEnumeration();
+        if (StringUtils.isNotBlank(enumarations) && StringUtils.startsWith(enumarations, "[") && StringUtils.endsWith(enumarations, "]")) {
+            JmixComboBox<?> comboBox = uiComponents.create(JmixComboBox.class);
+            Map enumValuesToDisplay = DynEnumStringParser.parseStringToMap(attribute.getEnumeration()).entrySet().stream().collect(Collectors.toMap(
+                    e -> DynEnumStringParser.toEnumString(e.getKey(), e.getValue()),
+                    e -> msgBundleTools.getLocalizedEnumeration(attribute.getEnumerationMsgBundle(), e.getKey()))); // msgbunde can be null!
+            comboBox.setLabel(attribute.getName());
+            ComponentUtils.setItemsMap(comboBox, enumValuesToDisplay);
+            setValueSource(comboBox, context);
+            setValidators(comboBox, attribute);
+
+            return comboBox;
+        }
+
+        if (property != null && property.endsWith(DynRateConstants.NOTE)) {
+            RichTextEditor editor = uiComponents.create(RichTextEditor.class);
+            editor.setValueSource(context.getValueSource());
+            return editor;
+        }
+        if (property != null && property.endsWith(DynRateConstants.RATE)) {
+            var editor = uiComponents.create(AuditRateRadioGroup.class);
+            editor.init(messages.getMessage(AuditRateRadioGroup.class, "rate_label"));
+            editor.setValueSource(context.getValueSource());
+            return editor;
+        }
+
+        return null;
+    }
+
     protected Component createComponentInternal(ComponentGenerationContext context, MetaClass metaClass, String propertyName) {
+
         AttributeDefinition attribute = dynamicModelMetadata.getAttributeByCode(metaClass,
                 DynAttrUtils.getAttributeCodeFromProperty(propertyName)).orElse(null);
 
@@ -153,7 +202,7 @@ public class DynAttrComponentGenerationStrategy implements ComponentGenerationSt
             setEditable((HasValueAndElement<?, ?>) resultComponent, attribute);
 
         }
-        if(resultComponent instanceof HasRequired) {
+        if (resultComponent instanceof HasRequired) {
             setRequired((HasRequired) resultComponent, attribute);
         }
         if (resultComponent instanceof HasEnabled && !(resultComponent instanceof HasValueAndElement)) {
@@ -426,7 +475,7 @@ public class DynAttrComponentGenerationStrategy implements ComponentGenerationSt
         Set<AttributeDefinition> dependentAttributes = attributeDependencies.getDependentAttributes(attribute);
         if (!dependentAttributes.isEmpty() && component instanceof SupportsValueSource) {
             //noinspection unchecked
-            if(component instanceof SupportsTypedValue) {
+            if (component instanceof SupportsTypedValue) {
                 ((SupportsTypedValue) component)
                         .addTypedValueChangeListener((ComponentEventListener<SupportsTypedValue.TypedValueChangeEvent<?, ?>>) event ->
                                 valueChangeListenerHandler((Component) component, attribute, event.getOldValue(), event.getValue()));

@@ -176,7 +176,7 @@ includeProject('tabbedmode-flowui-starter', 'jmix-tabbedmode/tabbedmode-flowui-s
 includeProject('pivottable-flowui', 'jmix-pivottable/pivottable-flowui')
 includeProject('pivottable-flowui-kit', 'jmix-pivottable/pivottable-flowui-kit')
 includeProject('pivottable-flowui-starter', 'jmix-pivottable/pivottable-flowui-starter')
-//includeProject('demo', 'jmix-demo')
+includeProject('demo', 'jmix-demo')
 
 void includeProject(String name, String path, boolean changeBuildFileName = true) {
     include ":$name"
