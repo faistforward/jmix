@@ -18,11 +18,18 @@ jobs:
       - name: Fetch all branches from GitHub
         run: |
           git remote set-url origin https://github.com/${{ github.repository }}.git
-          git fetch --prune origin  # Holt ALLE Branches & entfernt alte
+          git fetch --prune  # Holt ALLE Branches & entfernt alte
           git branch -r  # Debug: Zeigt alle Remote-Branches an
 
-      - name: Push all branches and tags to GitLab
+      - name: Push all branches to GitLab
         run: |
           git remote add gitlab https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/develop.faist/jmix.git
-          git push --prune gitlab "refs/remotes/origin/*:refs/heads/*"  # Push alle Branches
-          git push --prune gitlab --tags  # Push alle Tags
+          
+          # Pusht alle Branches (ohne "origin/" Prefix)
+          for branch in $(git branch -r | grep -v 'HEAD' | sed 's/origin\///'); do
+            echo "Pushing branch: $branch"
+            git push --prune gitlab origin/$branch:$branch
+          done
+
+          # Pusht alle Tags
+          git push --prune gitlab --tags
