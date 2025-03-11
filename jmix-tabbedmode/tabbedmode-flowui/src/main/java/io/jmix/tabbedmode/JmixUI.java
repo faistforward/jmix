@@ -33,6 +33,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import elemental.json.JsonValue;
 import io.jmix.core.security.SecurityContextHelper;
 import io.jmix.flowui.view.View;
+import io.jmix.tabbedmode.builder.ViewOpeningContext;
 import io.jmix.tabbedmode.navigation.RedirectHandler;
 import io.jmix.tabbedmode.view.ViewOpenMode;
 import org.slf4j.Logger;
@@ -500,59 +501,40 @@ public class JmixUI extends UI {
         log.debug("handleNavigation: '{}; trigger: '{}", location.getPath(), trigger);
         try {
             // Jmix API
-
-            /*NavigationEvent navigationEvent = new NavigationEvent(
-                    getInternals().getRouter(), location, this, trigger);*/
-
             Class<? extends Component> navigationTarget = navigationState.getNavigationTarget();
-            if (!View.class.isAssignableFrom(navigationTarget)) {
-                throw new IllegalArgumentException("'navigationTarget' is not a %s"
-                        .formatted(View.class.getSimpleName()));
+            // Don't throw exception for placeholder, just skip it
+            if (UI.ClientViewPlaceholder.class.isAssignableFrom(navigationTarget)) {
+                return;
             }
+
+            if (!View.class.isAssignableFrom(navigationTarget)) {
+                throw new IllegalArgumentException("navigationTarget '%s' is not a %s"
+                        .formatted(navigationTarget.getName(), View.class.getSimpleName()));
+            }
+
             //noinspection unchecked
             Class<? extends View<?>> viewClass = (Class<? extends View<?>>) navigationTarget;
-            View<?> view = views.create(viewClass);
             ViewOpenMode openMode = inferOpenMode(viewClass);
 
-            // TODO: gg, alternatively check for REFRESH_PAGE
             if (!ViewOpenMode.ROOT.equals(openMode)
                     && topLevelView == null) {
                 renderTopLevelView();
             }
 
-            // TODO: gg, rework
-            if (ViewOpenMode.NEW_TAB.equals(openMode)) {
-                // TODO: gg, QueryParameters
-                // TODO: gg, for test purposes only, use from menu items somehow
-                views.openFromNavigation(this, view, openMode);
-            } else {
-                views.open(this, view, openMode);
-            }
+            View<?> view = views.create(viewClass);
 
-//            JavaScriptNavigationStateRenderer clientNavigationStateRenderer = new JavaScriptNavigationStateRenderer(
-//                    navigationState);
-//            clientNavigationStateRenderer.handle(navigationEvent);
-
-            // TODO: gg, find out the case
-//            forwardToClientUrl = clientNavigationStateRenderer
-//                    .getClientForwardRoute();
-
-            adjustPageTitle();
+            views.open(this, ViewOpeningContext.create(view, openMode)
+                    .withRouteParameters(navigationState.getRouteParameters())
+                    .withQueryParameters(location.getQueryParameters())
+                    .withCheckMultipleOpen(true));
 
         } catch (Exception exception) {
             handleExceptionNavigation(location, exception);
         } finally {
-            if (getInternals().getSession().getConfiguration().isReactEnabled()
-                    && getInternals().getContinueNavigationAction() != null) {
-                getInternals().clearLastHandledNavigation();
-            } else {
-                getInternals().clearLastHandledNavigation();
-            }
-
+            getInternals().clearLastHandledNavigation();
         }
     }
 
-    // TODO: gg, consider all possible options (see com.vaadin.flow.router.internal.RouteUtil.getParentLayouts)
     protected ViewOpenMode inferOpenMode(Class<? extends View<?>> viewClass) {
         Route route = viewClass.getAnnotation(Route.class);
         if (route == null) {
@@ -594,19 +576,6 @@ public class JmixUI extends UI {
 
     private boolean isPostponed() {
         return getInternals().getContinueNavigationAction() != null;
-    }
-
-    private void adjustPageTitle() {
-        // new title is empty if the flow route does not have a title
-        String newTitle = getInternals().getTitle();
-        // app shell title is computed from the title tag in index.html
-        String appShellTitle = getInternals().getAppShellTitle();
-        // restore the app shell title when there is no one for the route
-        if ((newTitle == null || newTitle.isEmpty()) && appShellTitle != null
-                && !appShellTitle.isEmpty()) {
-            getInternals().cancelPendingTitleUpdate();
-            getInternals().setTitle(appShellTitle);
-        }
     }
 
     private void handleErrorNavigation(Location location) {
@@ -653,12 +622,18 @@ public class JmixUI extends UI {
             HasElement oldRoot = this.topLevelView;
             this.topLevelView = topLevelView;
 
+            // Probably 'wrapperElement' contains placeholder
+            if (oldRoot == null
+                    && wrapperElement.getChildren().findAny().isPresent()) {
+               wrapperElement.removeAllChildren();
+            }
+
             internalsHandler.updateRoot(this, oldRoot, topLevelView);
         }
     }
 
     @Override
-    public Component getCurrentView() {
+    public View<?> getCurrentView() {
         return views.getCurrentView(this);
     }
 
